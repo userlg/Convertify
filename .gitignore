@@ -2,3 +2,4 @@ videos_avi/
 __pycache__
 **/__pycache__/
 .venv/
+.pytest_cache/

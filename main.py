@@ -1,9 +1,9 @@
 from src.helpers import methods as m
 
+import os
+
 if __name__ == '__main__':
-    
-    file = 'vid0001.avi'
 
-    m.converting_video(file)
+    location = os.getcwd()
 
-    print(m.verify_avi_format(file))
+    m.exploring_directories(location)

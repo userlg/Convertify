@@ -1,5 +1,9 @@
-from src.helpers.methods import converting_video
+from src.helpers import methods as m
 
 if __name__ == '__main__':
-    print('Working')
-    converting_video()
+    
+    file = 'vid0001.avi'
+
+    m.converting_video(file)
+
+    print(m.verify_avi_format(file))

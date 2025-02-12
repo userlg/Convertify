@@ -33,17 +33,20 @@ def exploring_directories(location: str) -> bool:
                 exploring_directories(new_name)
 
             if directory.endswith(".avi") and not flag:
+                print("location: " + location)
                 convert_all_videos(location)
                 flag = True
+                
 
-    return True
+    if len(new_directories) > 0:
+        return True
+    else:
+        return False
 
 
-def convert_all_videos(location: str) -> True:
+def convert_all_videos(location: str) -> bool:
 
     files = os.listdir(location)
-
-    print(location)
 
     videos = []
 
@@ -54,7 +57,10 @@ def convert_all_videos(location: str) -> True:
     for video in videos:
         converting_video_to_mp4(location + "/" + video)
 
-    return True
+    if len(videos) > 0:
+        return True
+    else:
+        return False
 
 
 def converting_video_to_mp4(file: str) -> bool:

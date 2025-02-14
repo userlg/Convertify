@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 # Generate the file .exe
 
-pyinstaller --onefile --icon=favicon.ico app.py --collect-all moviepy
+pyinstaller --onefile --icon=favicon.ico main.py --collect-all moviepy
 
 # Run the tests
 pytest --cov -v
@@ -38,6 +38,8 @@ pytest --cov --cov-report=html:coverage_re
 ```
 -------------------------------------------
 # Screenshots
++ Map Application
+![ map ](screenshots/map.png)
 + Running all tests
 ![ test ](screenshots/test.png)
 

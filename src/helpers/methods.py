@@ -36,7 +36,6 @@ def exploring_directories(location: str) -> bool:
                 print("location: " + location)
                 convert_all_videos(location)
                 flag = True
-                
 
     if len(new_directories) > 0:
         return True

@@ -4,8 +4,6 @@ import os
 
 if __name__ == "__main__":
 
-    #location = os.getcwd()
-
-    location = 'C:/Users/Kike/Desktop/Resumen'
+    location = "W:/4. PREPARAR RESUMEN/"
 
     m.exploring_directories(location)

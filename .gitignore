@@ -2,9 +2,11 @@ videos_avi/
 __pycache__
 **/__pycache__/
 .venv/
+.vscode/
 .pytest_cache/
 temp/
 dist/
 build/
 main.spec
 vids/** 
+main.exe

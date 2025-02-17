@@ -1,81 +1,60 @@
 from moviepy import VideoFileClip
-
 import os
 
 
 def generate_new_name(filename: str) -> str:
-
-    return filename[filename.index(filename[0]) : filename.index(".")] + ".mp4"
+    """Genera un nuevo nombre de archivo cambiando la extensión a .mp4."""
+    return os.path.splitext(filename)[0] + ".mp4"
 
 
 def verify_avi_format(filename: str) -> bool:
+    """Verifica si un archivo tiene la extensión .avi."""
+    return filename.lower().endswith(".avi")
 
-    return filename.endswith(".avi")
 
+def explore_directories(location: str) -> bool:
+    """Explora directorios y convierte archivos .avi a .mp4."""
+    for root, dirs, files in os.walk(location):
+        # Ignorar directorios ocultos
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
 
-def exploring_directories(location: str) -> bool:
+        # Filtrar archivos .avi
+        avi_files = [f for f in files if verify_avi_format(f)]
 
-    directories = os.listdir(location)
+        if avi_files:
+            print(f"Location: {root}")
+            convert_all_videos(root, avi_files)
 
-    flag = False
-
-    new_directories = []
-
-    for directory in directories:
-        if not directory.startswith("."):
-
-            new_name = location + "/" + directory
-
-            if os.path.isdir(new_name):
-
-                new_directories.append(directory)
-
-                exploring_directories(new_name)
-
-            if directory.endswith(".avi") and not flag:
-                print("location: " + location)
-                convert_all_videos(location)
-                flag = True
-
-    if len(new_directories) > 0:
+    if len(avi_files) > 0 or len(dirs) > 0:
         return True
     else:
         return False
 
 
-def convert_all_videos(location: str) -> bool:
+def convert_all_videos(location: str, videos: list[str]) -> bool:
+    """Convierte todos los archivos .avi en una ubicación a .mp4."""
 
-    files = os.listdir(location)
-
-    videos = []
-
-    for file in files:
-        if file.endswith(".avi"):
-            videos.append(file)
+    if len(videos) == 0:
+        return False
 
     for video in videos:
-        converting_video_to_mp4(location + "/" + video)
-
-    if len(videos) > 0:
-        return True
-    else:
-        return False
+        video_path = os.path.join(location, video)
+        converting_video_to_mp4(video_path)
+    return True
 
 
 def converting_video_to_mp4(file: str) -> bool:
+    """Convierte un archivo .avi a .mp4 y elimina el original."""
+    if not verify_avi_format(file):
+        return False
 
-    if verify_avi_format(file):
-
+    try:
         clip = VideoFileClip(file)
-
         new_filename = generate_new_name(file)
-
         clip.write_videofile(new_filename)
-
         clip.close()
-
         os.remove(file)
-
         return True
-    else:
+    except Exception as e:
+        #print(f"Error al convertir {file}: {e}")
         return False

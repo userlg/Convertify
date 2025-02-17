@@ -4,6 +4,6 @@ import os
 
 if __name__ == "__main__":
 
-    location = "W:/4. PREPARAR RESUMEN/"
+    location = "W:/4. PREPARAR RESUMEN"
 
-    m.exploring_directories(location)
+    m.explore_directories(location)

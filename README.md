@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 # Generate the file .exe
 
-pyinstaller --onefile --icon=favicon.ico main.py --collect-all moviepy
+pyinstaller --onefile --icon=favicon.ico main.py --name=convertify --collect-all moviepy
 
 # Run the tests
 pytest --cov -v

@@ -7,3 +7,5 @@ if __name__ == "__main__":
     location = "W:/4. PREPARAR RESUMEN"
 
     m.explore_directories(location)
+
+    #m.explore_directories(os.getcwd())

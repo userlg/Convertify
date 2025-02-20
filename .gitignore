@@ -2,7 +2,9 @@ videos_avi/
 __pycache__
 **/__pycache__/
 .venv/
+avi/
 .vscode/
+.coverage
 .pytest_cache/
 temp/
 dist/
@@ -10,3 +12,4 @@ build/
 main.spec
 vids/** 
 main.exe
+convertify.spec

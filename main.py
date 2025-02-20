@@ -8,4 +8,5 @@ if __name__ == "__main__":
 
     m.explore_directories(location)
 
+    #This opcion is only for tests
     #m.explore_directories(os.getcwd())

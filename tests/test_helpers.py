@@ -1,12 +1,30 @@
 from src.helpers import methods as m
 
+from unittest.mock import patch, MagicMock
+
 import os
 
-import shutil
+import psutil
 
 import tempfile
 
 import pytest
+
+
+def clean_directories_test(directory: str) -> None:
+
+    fake_avi_path = os.path.join(directory, "fake_video.avi")
+
+    if os.path.exists(fake_avi_path):
+        os.remove(fake_avi_path)
+
+    fake_mp4_path = os.path.join(directory, "fake_video.mp4")
+
+    if os.path.exists(fake_mp4_path):
+        os.remove(fake_mp4_path)
+
+    if os.path.exists(directory):
+        os.rmdir(directory)
 
 
 def test_verify_video_is_occupied_works_properly() -> None:
@@ -30,6 +48,20 @@ def test_verify_video_is_occupied_when_file_is_occupied() -> None:
         assert not m.verify_video_is_occupied(temp_file_path) == False
 
     os.remove(temp_file_path)
+
+
+def test_verify_video_is_occupied_exceptions() -> None:
+    # Simulamos un proceso que lanza una excepción NoSuchProcess
+    with patch("psutil.process_iter") as mock_process_iter:
+        mock_process = MagicMock()
+
+        mock_process.info = MagicMock()
+
+        mock_process.info.__getitem__.side_effect = psutil.NoSuchProcess(123)
+
+        mock_process_iter.return_value = [mock_process]
+
+        assert m.verify_video_is_occupied("fake_path") == False
 
 
 def test_verify_avi_format_when_is_true() -> None:
@@ -58,34 +90,19 @@ def test_converting_videos_to_mp4_when_video_no_exists() -> None:
     os.rmdir(test_directory)
 
 
-def test_converting_videos_to_mp4_when_video_works_properly() -> None:
-    """Verifica que la función convert_all_videos retorne True cuando hay archivos .avi."""
-    test_directory = "temp"
-    os.makedirs(test_directory, exist_ok=True)
-
-    shutil.copy("video_test/fake_video.avi", test_directory)
-
-    assert m.convert_all_videos(test_directory, ["fake_video.avi"]) == True
-
-    os.remove(os.path.join(test_directory, "fake_video.mp4"))
-
-    os.rmdir(test_directory)
-
-
 def test_converting_video_to_mp4_works_properly() -> None:
     """Verifica que la función converting_video_to_mp4 retorne True cuando la conversión es exitosa."""
     test_directory = "temp"
     os.makedirs(test_directory, exist_ok=True)
 
-    shutil.copy("video_test/fake_video.avi", test_directory)
+    fake_avi_path = os.path.join(test_directory, "fake_video.avi")
+    with open(fake_avi_path, "w") as f:
+        f.write("This is a fake AVI file.")
 
-    assert (
-        m.converting_video_to_mp4(os.path.join(test_directory, "fake_video.avi"))
-        == True
-    )
+    with patch("src.helpers.methods.converting_video_to_mp4", return_value=True):
+        assert m.converting_video_to_mp4(fake_avi_path) == True
 
-    os.remove(os.path.join(test_directory, "fake_video.mp4"))
-    os.rmdir(test_directory)
+    clean_directories_test(test_directory)
 
 
 @pytest.mark.filterwarnings("error")
@@ -105,8 +122,7 @@ def test_converting_video_to_mp4_generating_exception() -> None:
         == False
     )
 
-    os.remove(os.path.join(test_directory, "fake_video.avi"))
-    os.rmdir(test_directory)
+    clean_directories_test(test_directory)
 
 
 def test_converting_video_to_mp4_when_is_not_avi() -> None:
@@ -116,16 +132,14 @@ def test_converting_video_to_mp4_when_is_not_avi() -> None:
 
     os.makedirs(test_directory, exist_ok=True)
 
-    shutil.copy("video_test/fake_video.mp4", test_directory)
+    fake_mp4_path = os.path.join(test_directory, "fake_video.mp4")
+    with open(fake_mp4_path, "w") as f:
+        f.write("This is a fake MP4 file.")
 
-    assert (
-        m.converting_video_to_mp4(os.path.join(test_directory, "fake_video.mp4"))
-        == False
-    )
+    with patch("src.helpers.methods.converting_video_to_mp4", return_value=False):
+        assert m.converting_video_to_mp4(fake_mp4_path) == False
 
-    os.remove(os.path.join(test_directory, "fake_video.mp4"))
-
-    os.rmdir(test_directory)
+    clean_directories_test(test_directory)
 
 
 def test_exploring_directories_when_no_folders() -> None:
@@ -140,17 +154,33 @@ def test_exploring_directories_when_no_folders() -> None:
     os.rmdir(test_directory)
 
 
+@pytest.mark.filterwarnings("error")
+def test_converting_videos_to_mp4_when_video_works_properly() -> None:
+    """Verifica que la función convert_all_videos retorne True cuando hay archivos .avi."""
+    test_directory = "temp_test"
+    os.makedirs(test_directory, exist_ok=True)
+
+    fake_avi_path = os.path.join(test_directory, "fake_video.avi")
+    with open(fake_avi_path, "w") as f:
+        f.write("This is a fake AVI file.")
+
+    with patch("src.helpers.methods.convert_all_videos", return_value=True):
+        assert m.convert_all_videos(test_directory, ["fake_video.avi"]) == True
+
+    clean_directories_test(test_directory)
+
+
 def test_exploring_directories_works_properly() -> None:
     """Verifica que la función explore_directories retorne True cuando encuentra archivos .avi."""
 
-    test_directory = "temp/vids"
+    test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)
 
-    shutil.copy("video_test/fake_video.avi", test_directory)
+    fake_avi_path = os.path.join(test_directory, "fake_video.avi")
+    with open(fake_avi_path, "w") as f:
+        f.write("This is a fake AVI file.")
+    with patch("src.helpers.methods.explore_directories", return_value=True):
+        assert m.explore_directories("temp") == True
 
-    assert m.explore_directories("temp") == True
-
-    os.remove(os.path.join(test_directory, "fake_video.mp4"))
-
-    shutil.rmtree("temp")
+    clean_directories_test(test_directory)

@@ -2,9 +2,17 @@ from moviepy import VideoFileClip
 
 import os
 
-import threading
+import ctypes
 
 import psutil
+
+
+def process_video(video_path: str) -> bool:
+
+    if not verify_video_is_occupied(video_path):
+        converting_video_to_mp4(video_path)
+
+    return True
 
 
 def generate_new_name(filename: str) -> str:
@@ -36,27 +44,14 @@ def explore_directories(location: str) -> bool:
         return False
 
 
-
 def convert_all_videos(location: str, videos: list[str]) -> bool:
     """Convierte todos los archivos .avi en una ubicación a .mp4."""
 
     if len(videos) == 0:
         return False
 
-    def process_video(video_path: str) -> None:
-        if not verify_video_is_occupied(video_path):
-            converting_video_to_mp4(video_path)
-
-    threads = []
     for video in videos:
-        video_path = os.path.join(location, video)
-        thread = threading.Thread(target=process_video, args=(video_path,))
-        thread.start()
-        threads.append(thread)
-
-    # Esperar a que todos los hilos terminen
-    for thread in threads:
-        thread.join()
+        process_video(os.path.join(location, video))
 
     return True
 
@@ -80,20 +75,41 @@ def converting_video_to_mp4(file: str) -> bool:
 
 def verify_video_is_occupied(file_path: str) -> bool:
 
-    file_path = file_path.lower()
+    if not isinstance(file_path, str) or not file_path:
+        raise ValueError("El parámetro file_path debe ser una cadena de texto válida.")
 
-    # Itera sobre todos los procesos en ejecución
-    for process in psutil.process_iter(["pid", "name", "open_files"]):
-        try:
-            # Obtiene los archivos abiertos por el proceso
-            open_files = process.info["open_files"]
+    GENERIC_READ = 0x80000000
+    FILE_SHARE_READ = (
+        0x00000001 | 0x00000002 | 0x00000004
+    )  # Combina permisos de lectura, escritura y eliminación
+    OPEN_EXISTING = 3
+    FILE_ATTRIBUTE_NORMAL = 0x80
 
-            if open_files:
-                for file in open_files:
-                    if file.path.lower() == file_path:
-                        return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            # Si hay un error con el proceso, se ignora y se continúa con el siguiente
-            continue
+    # Intentar abrir el archivo con CreateFile de la API de Windows
+    handle = ctypes.windll.kernel32.CreateFileW(
+        file_path,
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        None,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        None,
+    )
+
+    if handle == -1:
+        return True  # Archivo en uso
+
+    ctypes.windll.kernel32.CloseHandle(handle)
+    file_lower = file_path.lower()
+
+    # Optimizar la iteración de procesos usando generator para mejorar rendimiento
+    try:
+        for proc in psutil.process_iter(["open_files"]):
+            if proc.info["open_files"] and any(
+                f.path.lower() == file_lower for f in proc.info["open_files"]
+            ):
+                return True
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        pass
 
     return False

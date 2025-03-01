@@ -10,8 +10,6 @@ import tempfile
 
 import pytest
 
-import moviepy
-
 
 def clean_directories_test(directory: str) -> None:
 
@@ -63,7 +61,46 @@ def test_verify_video_is_occupied_exceptions() -> None:
 
         mock_process_iter.return_value = [mock_process]
 
-        assert m.verify_video_is_occupied("fake_path") == False
+        assert m.verify_video_is_occupied("fake_path") == True
+
+
+def test_verify_video_is_occupied_exception():
+    with pytest.raises(Exception):
+        m.verify_video_is_occupied(None)
+
+
+def test_verify_video_is_occupied_when_file_in_use_invalid_path():
+    with pytest.raises(
+        ValueError, match="El parámetro file_path debe ser una cadena de texto válida."
+    ):
+        m.verify_video_is_occupied(123)
+
+
+def test_verify_video_is_occupied_when_file_in_use_open_file(mocker):
+    mocker.patch(
+        "psutil.process_iter",
+        return_value=[
+            mocker.Mock(
+                info={"open_files": [mocker.Mock(path="C:\\ruta\\al\\fake.avi")]}
+            )
+        ],
+    )
+    assert (
+        m.verify_video_is_occupied("C:\\ruta\\al\\archivo.avi") == True
+    )  # Simula archivo en uso
+
+
+def test_is_file_in_use_not_open_file(mocker):
+    mocker.patch("psutil.process_iter", return_value=[], autospec=True)
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file_path = temp_file.name
+
+    result = m.verify_video_is_occupied(temp_file_path)
+    assert result == False
+
+
+########################################################################
 
 
 def test_verify_avi_format_when_is_true() -> None:
@@ -211,3 +248,20 @@ def test_exception_during_conversion_video():
         assert m.converting_video_to_mp4("fake_file.avi") == False
 
         mock_remove.assert_not_called()
+
+
+def test_process_video_works_properly() -> None:
+
+    test_directory = "temp"
+
+    os.makedirs(test_directory, exist_ok=True)
+
+    fake_avi_path = os.path.join(test_directory, "fake_video.avi")
+
+    with open(fake_avi_path, "w") as f:
+        f.write("This is a fake AVI file.")
+
+    with patch("src.helpers.methods.process_video", return_value=True):
+        assert m.process_video(fake_avi_path) == True
+
+    clean_directories_test(test_directory)

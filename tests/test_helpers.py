@@ -1,8 +1,35 @@
 from src.helpers import methods as m
+
 import os
+
 import shutil
 
+import tempfile
+
 import pytest
+
+
+def test_verify_video_is_occupied_works_properly() -> None:
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file_path = temp_file.name
+
+    with open(temp_file_path, "r") as f:
+        # Verificar que la función detecta que el archivo está ocupado
+        assert m.verify_video_is_occupied(temp_file_path) == True
+
+    os.remove(temp_file_path)
+
+
+def test_verify_video_is_occupied_when_file_is_occupied() -> None:
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file_path = temp_file.name
+
+        # Verificar que el archivo no está ocupado inicialmente
+        assert not m.verify_video_is_occupied(temp_file_path) == False
+
+    os.remove(temp_file_path)
 
 
 def test_verify_avi_format_when_is_true() -> None:

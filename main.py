@@ -1,5 +1,7 @@
 from src.helpers import methods as m
 
+import psutil
+
 import os
 
 if __name__ == "__main__":
@@ -8,5 +10,5 @@ if __name__ == "__main__":
 
     m.explore_directories(location)
 
-    #This opcion is only for tests
-    #m.explore_directories(os.getcwd())
+    # This opcion is only for tests
+    # m.explore_directories(os.getcwd())

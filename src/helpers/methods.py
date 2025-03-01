@@ -1,6 +1,8 @@
 from moviepy import VideoFileClip
 import os
 
+import psutil
+
 
 def generate_new_name(filename: str) -> str:
     """Genera un nuevo nombre de archivo cambiando la extensión a .mp4."""
@@ -14,6 +16,7 @@ def verify_avi_format(filename: str) -> bool:
 
 def explore_directories(location: str) -> bool:
     """Explora directorios y convierte archivos .avi a .mp4."""
+
     for root, dirs, files in os.walk(location):
         # Ignorar directorios ocultos
         dirs[:] = [d for d in dirs if not d.startswith(".")]
@@ -22,7 +25,6 @@ def explore_directories(location: str) -> bool:
         avi_files = [f for f in files if verify_avi_format(f)]
 
         if avi_files:
-            print(f"Location: {root}")
             convert_all_videos(root, avi_files)
 
     if len(avi_files) > 0 or len(dirs) > 0:
@@ -39,7 +41,9 @@ def convert_all_videos(location: str, videos: list[str]) -> bool:
 
     for video in videos:
         video_path = os.path.join(location, video)
-        converting_video_to_mp4(video_path)
+        if not verify_video_is_occupied(video_path):
+            converting_video_to_mp4(video_path)
+
     return True
 
 
@@ -56,5 +60,26 @@ def converting_video_to_mp4(file: str) -> bool:
         os.remove(file)
         return True
     except Exception as e:
-        #print(f"Error al convertir {file}: {e}")
+        # print(f"Error al convertir {file}: {e}")
         return False
+
+
+def verify_video_is_occupied(file_path: str) -> bool:
+
+    file_path = file_path.lower()
+
+    # Itera sobre todos los procesos en ejecución
+    for process in psutil.process_iter(["pid", "name", "open_files"]):
+        try:
+            # Obtiene los archivos abiertos por el proceso
+            open_files = process.info["open_files"]
+
+            if open_files:
+                for file in open_files:
+                    if file.path.lower() == file_path:
+                        return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            # Si hay un error con el proceso, se ignora y se continúa con el siguiente
+            continue
+
+    return False

@@ -10,6 +10,8 @@ import tempfile
 
 import pytest
 
+import moviepy
+
 
 def clean_directories_test(directory: str) -> None:
 
@@ -184,3 +186,28 @@ def test_exploring_directories_works_properly() -> None:
         assert m.explore_directories("temp") == True
 
     clean_directories_test(test_directory)
+
+
+@pytest.mark.filterwarnings("error")
+def test_exception_during_conversion_video():
+
+    # Declare all mocks necesary to the test
+    with patch(
+        "src.helpers.methods.verify_avi_format"
+    ) as mock_verify_avi_format, patch(
+        "moviepy.VideoFileClip"
+    ) as mock_video_file_clip, patch(
+        "src.helpers.methods.generate_new_name"
+    ) as mock_generate_new_name, patch(
+        "os.remove"
+    ) as mock_remove:
+
+        mock_verify_avi_format.return_value = True
+
+        mock_generate_new_name.return_value = "new_file.mp4"
+
+        mock_video_file_clip.side_effect = Exception("Throw exception")
+
+        assert m.converting_video_to_mp4("fake_file.avi") == False
+
+        mock_remove.assert_not_called()

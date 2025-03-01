@@ -35,6 +35,9 @@ pytest --cov -v
 #Generate Report Coverage
 pytest --cov --cov-report=html:coverage_re
 
+#Generate Miss lines of cov
+pytest-cov  --cov-report=annotate
+
 ```
 -------------------------------------------
 # Screenshots

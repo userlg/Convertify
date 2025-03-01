@@ -1,6 +1,7 @@
 videos_avi/
 __pycache__
 **/__pycache__/
+coverage_re/
 .venv/
 avi/
 .vscode/

@@ -1,5 +1,8 @@
 from moviepy import VideoFileClip
+
 import os
+
+import threading
 
 import psutil
 
@@ -33,16 +36,27 @@ def explore_directories(location: str) -> bool:
         return False
 
 
+
 def convert_all_videos(location: str, videos: list[str]) -> bool:
     """Convierte todos los archivos .avi en una ubicación a .mp4."""
 
     if len(videos) == 0:
         return False
 
-    for video in videos:
-        video_path = os.path.join(location, video)
+    def process_video(video_path: str) -> None:
         if not verify_video_is_occupied(video_path):
             converting_video_to_mp4(video_path)
+
+    threads = []
+    for video in videos:
+        video_path = os.path.join(location, video)
+        thread = threading.Thread(target=process_video, args=(video_path,))
+        thread.start()
+        threads.append(thread)
+
+    # Esperar a que todos los hilos terminen
+    for thread in threads:
+        thread.join()
 
     return True
 
@@ -60,7 +74,7 @@ def converting_video_to_mp4(file: str) -> bool:
         os.remove(file)
         return True
     except Exception as e:
-        # print(f"Error al convertir {file}: {e}")
+        print(f"Error al convertir {file}: {e}")
         return False
 
 

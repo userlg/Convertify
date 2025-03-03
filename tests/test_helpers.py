@@ -85,9 +85,7 @@ def test_verify_video_is_occupied_when_file_in_use_open_file(mocker):
             )
         ],
     )
-    assert (
-        m.verify_video_is_occupied("C:\\ruta\\al\\archivo.avi") == True
-    )  # Simula archivo en uso
+    assert m.verify_video_is_occupied("C:\\ruta\\al\\archivo.avi") == True
 
 
 def test_is_file_in_use_not_open_file(mocker):
@@ -98,9 +96,6 @@ def test_is_file_in_use_not_open_file(mocker):
 
     result = m.verify_video_is_occupied(temp_file_path)
     assert result == False
-
-
-########################################################################
 
 
 def test_verify_avi_format_when_is_true() -> None:

@@ -1,10 +1,8 @@
-from moviepy import VideoFileClip
-
+import ctypes
 import os
 
-import ctypes
-
 import psutil
+from moviepy import VideoFileClip
 
 
 def process_video(video_path: str) -> bool:
@@ -76,7 +74,7 @@ def converting_video_to_mp4(file: str) -> bool:
 def verify_video_is_occupied(file_path: str) -> bool:
 
     if not isinstance(file_path, str) or not file_path:
-        raise ValueError("El parámetro file_path debe ser una cadena de texto válida.")
+         raise ValueError("Invalid String")
 
     GENERIC_READ = 0x80000000
     FILE_SHARE_READ = (

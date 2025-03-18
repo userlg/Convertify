@@ -1,6 +1,6 @@
-from src.helpers import methods as m
-
 import os
+
+from src.helpers import methods as m
 
 if __name__ == "__main__":
 

@@ -40,7 +40,19 @@ class LoguruLogger(ILogger):
 
         # Add file handler if specified
         if log_file:
-            log_file.parent.mkdir(parents=True, exist_ok=True)
+            log_dir = log_file.parent
+            log_dir.mkdir(parents=True, exist_ok=True)
+
+            # Make logs folder hidden on Windows
+            if sys.platform == "win32":
+                import ctypes
+                try:
+                    # Set hidden attribute on Windows
+                    FILE_ATTRIBUTE_HIDDEN = 0x02
+                    ctypes.windll.kernel32.SetFileAttributesW(str(log_dir), FILE_ATTRIBUTE_HIDDEN)
+                except Exception:
+                    pass  # Ignore errors if setting hidden attribute fails
+
             logger.add(
                 str(log_file),
                 format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",

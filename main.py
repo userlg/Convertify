@@ -68,6 +68,13 @@ def convert(
             help="Directories to scan for AVI files (can be specified multiple times)",
         ),
     ] = None,
+    lab: Annotated[
+        bool,
+        typer.Option(
+            "--lab",
+            help="Use predefined lab directories (W:/4. PREPARAR RESUMEN, W:/8. Base Datos Unica)",
+        ),
+    ] = False,
     remove_source: Annotated[
         bool | None,
         typer.Option(
@@ -89,8 +96,18 @@ def convert(
         settings = load_settings()
 
         # Override settings with CLI arguments if provided
-        if directories:
+        if lab:
+            # Use predefined lab directories
+            settings.conversion_directories = [
+                "W:/4. PREPARAR RESUMEN",
+                "W:/8. Base Datos Unica"
+            ]
+            console.print("[cyan]Using lab directories:[/cyan]")
+            console.print("  - W:/4. PREPARAR RESUMEN")
+            console.print("  - W:/8. Base Datos Unica")
+        elif directories:
             settings.conversion_directories = directories
+        
         if remove_source is not None:
             settings.remove_source = remove_source
         if skip_existing is not None:
@@ -169,4 +186,10 @@ def version():
 
 
 if __name__ == "__main__":
+    import sys
+
+    # If no arguments provided (just running the exe), execute convert by default
+    if len(sys.argv) == 1:
+        sys.argv.append("convert")
+
     app()

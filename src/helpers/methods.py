@@ -6,7 +6,6 @@ from moviepy import VideoFileClip
 
 
 def process_video(video_path: str) -> bool:
-
     if not verify_video_is_occupied(video_path):
         converting_video_to_mp4(video_path)
 
@@ -36,10 +35,7 @@ def explore_directories(location: str) -> bool:
         if avi_files:
             convert_all_videos(root, avi_files)
 
-    if len(avi_files) > 0 or len(dirs) > 0:
-        return True
-    else:
-        return False
+    return bool(len(avi_files) > 0 or len(dirs) > 0)
 
 
 def convert_all_videos(location: str, videos: list[str]) -> bool:
@@ -72,9 +68,8 @@ def converting_video_to_mp4(file: str) -> bool:
 
 
 def verify_video_is_occupied(file_path: str) -> bool:
-
     if not isinstance(file_path, str) or not file_path:
-         raise ValueError("Invalid String")
+        raise ValueError("Invalid String")
 
     GENERIC_READ = 0x80000000
     FILE_SHARE_READ = (

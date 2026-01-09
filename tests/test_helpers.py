@@ -9,7 +9,6 @@ from src.helpers import methods as m
 
 
 def clean_directories_test(directory: str) -> None:
-
     fake_avi_path = os.path.join(directory, "fake_video.avi")
 
     if os.path.exists(fake_avi_path):
@@ -25,7 +24,6 @@ def clean_directories_test(directory: str) -> None:
 
 
 def test_verify_video_is_occupied_works_properly() -> None:
-
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file_path = temp_file.name
 
@@ -36,11 +34,10 @@ def test_verify_video_is_occupied_works_properly() -> None:
 
 
 def test_verify_video_is_occupied_when_file_is_occupied() -> None:
-
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file_path = temp_file.name
 
-        assert  m.verify_video_is_occupied(temp_file_path)
+        assert m.verify_video_is_occupied(temp_file_path)
 
     os.remove(temp_file_path)
 
@@ -59,8 +56,9 @@ def test_verify_video_is_occupied_exceptions() -> None:
 
 
 def test_verify_video_is_occupied_exception() -> None:
-    with pytest.raises(ValueError):  
+    with pytest.raises(ValueError):
         m.verify_video_is_occupied(None)
+
 
 def test_verify_video_is_occupied_when_file_in_use_invalid_path() -> None:
     with pytest.raises(ValueError, match="Invalid String"):
@@ -71,9 +69,7 @@ def test_verify_video_is_occupied_when_file_in_use_open_file(mocker):
     mocker.patch(
         "psutil.process_iter",
         return_value=[
-            mocker.Mock(
-                info={"open_files": [mocker.Mock(path="C:\\ruta\\al\\fake.avi")]}
-            )
+            mocker.Mock(info={"open_files": [mocker.Mock(path="C:\\ruta\\al\\fake.avi")]})
         ],
     )
     assert m.verify_video_is_occupied("C:\\ruta\\al\\archivo.avi")
@@ -127,24 +123,19 @@ def test_converting_video_to_mp4_works_properly() -> None:
 
 @pytest.mark.filterwarnings("error")
 def test_converting_video_to_mp4_generating_exception() -> None:
-
     test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)
 
-    file = open(os.path.join(test_directory, "fake_video.avi"), "w+")
+    with open(os.path.join(test_directory, "fake_video.avi"), "w+"):
+        pass
 
-    file.close()
-
-    assert (
-        m.converting_video_to_mp4(os.path.join(test_directory, "fake_video.avi"))
-    ) is False
+    assert (m.converting_video_to_mp4(os.path.join(test_directory, "fake_video.avi"))) is False
 
     clean_directories_test(test_directory)
 
 
 def test_converting_video_to_mp4_when_is_not_avi() -> None:
-
     test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)
@@ -160,7 +151,6 @@ def test_converting_video_to_mp4_when_is_not_avi() -> None:
 
 
 def test_exploring_directories_when_no_folders() -> None:
-
     test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)
@@ -186,7 +176,6 @@ def test_converting_videos_to_mp4_when_video_works_properly() -> None:
 
 
 def test_exploring_directories_works_properly() -> None:
-
     test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)
@@ -202,18 +191,13 @@ def test_exploring_directories_works_properly() -> None:
 
 @pytest.mark.filterwarnings("error")
 def test_exception_during_conversion_video():
-
     # Declare all mocks necesary to the test
-    with patch(
-        "src.helpers.methods.verify_avi_format"
-    ) as mock_verify_avi_format, patch(
-        "moviepy.VideoFileClip"
-    ) as mock_video_file_clip, patch(
-        "src.helpers.methods.generate_new_name"
-    ) as mock_generate_new_name, patch(
-        "os.remove"
-    ) as mock_remove:
-
+    with (
+        patch("src.helpers.methods.verify_avi_format") as mock_verify_avi_format,
+        patch("moviepy.VideoFileClip") as mock_video_file_clip,
+        patch("src.helpers.methods.generate_new_name") as mock_generate_new_name,
+        patch("os.remove") as mock_remove,
+    ):
         mock_verify_avi_format.return_value = True
 
         mock_generate_new_name.return_value = "new_file.mp4"
@@ -226,7 +210,6 @@ def test_exception_during_conversion_video():
 
 
 def test_process_video_works_properly() -> None:
-
     test_directory = "temp"
 
     os.makedirs(test_directory, exist_ok=True)

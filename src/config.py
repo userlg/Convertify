@@ -24,15 +24,15 @@ class Settings(BaseSettings):
 
     # Conversion settings
     video_codec: str = Field(default="libx264", description="Video codec for conversion")
-    audio_codec: str = Field(default="aac", description="Audio codec for conversion")
+    audio_codec: str = Field(default="copy", description="Audio codec for conversion (copy for speed)")
     preset: str = Field(
-        default="medium",
+        default="ultrafast",
         description="Encoding preset (ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow)",
     )
     crf: int = Field(
-        default=23, ge=0, le=51, description="Constant Rate Factor (0-51, lower is better quality)"
+        default=30, ge=0, le=51, description="Constant Rate Factor (0-51, lower is better quality)"
     )
-    audio_bitrate: str = Field(default="128k", description="Audio bitrate")
+    audio_bitrate: str = Field(default="96k", description="Audio bitrate")
     threads: int = Field(default=0, ge=0, description="Number of threads (0 = auto)")
 
     # Behavior settings

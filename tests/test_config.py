@@ -13,9 +13,9 @@ def test_settings_defaults():
     settings = Settings()
 
     assert settings.video_codec == "libx264"
-    assert settings.audio_codec == "aac"
-    assert settings.preset == "medium"
-    assert settings.crf == 23
+    assert settings.audio_codec == "copy"  # Changed to 'copy' for extreme speed
+    assert settings.preset == "ultrafast"  # Changed to 'ultrafast' for extreme speed
+    assert settings.crf == 30  # Changed to 30 for extreme speed
     assert settings.remove_source is True
     assert settings.skip_if_exists is True
     assert settings.max_retries == 3

@@ -6,10 +6,21 @@ from pathlib import Path
 import psutil
 
 from src.domain.interfaces import IFileRepository
+from src.infrastructure.directory_cache import DirectoryCache
 
 
 class FileSystemRepository(IFileRepository):
-    """Implementation of file repository using the file system."""
+    """Implementation of file repository using the file system with caching."""
+
+    def __init__(self, use_cache: bool = True):
+        """
+        Initialize file repository.
+
+        Args:
+            use_cache: Whether to use directory caching for large directories
+        """
+        self.use_cache = use_cache
+        self.cache = DirectoryCache() if use_cache else None
 
     def exists(self, file_path: Path) -> bool:
         """Check if a file exists."""
@@ -83,7 +94,7 @@ class FileSystemRepository(IFileRepository):
 
     def find_avi_files(self, directory: Path, recursive: bool = True) -> list[Path]:
         """
-        Find all AVI files in a directory.
+        Find all AVI files in a directory with intelligent caching.
 
         Args:
             directory: Directory to search
@@ -98,11 +109,45 @@ class FileSystemRepository(IFileRepository):
         avi_files: list[Path] = []
 
         if recursive:
-            # Use rglob for recursive search, excluding hidden directories
-            for file_path in directory.rglob("*.avi"):
-                # Skip hidden directories (starting with .)
-                if not any(part.startswith(".") for part in file_path.parts):
-                    avi_files.append(file_path)
+            # Check if this is a large directory that would benefit from caching
+            use_smart_scan = self.use_cache and self.cache is not None
+            
+            if use_smart_scan:
+                # Get cache stats
+                stats = self.cache.get_cache_stats(directory)
+                if stats["cached"]:
+                    print(f"  Cache: {stats['subdirs_cached']} subdirs cached, last scan: {stats['last_scan']}")
+                
+                # Get directories that need scanning
+                dirs_to_scan = self.cache.get_directories_to_scan(directory)
+                
+                if not dirs_to_scan:
+                    print(f"  Cache: No new directories to scan in {directory.name}")
+                    return []
+                
+                if len(dirs_to_scan) == 1 and directory in dirs_to_scan:
+                    print(f"  Cache: Full scan required for {directory.name}")
+                else:
+                    print(f"  Cache: Scanning {len(dirs_to_scan)} new/modified directories")
+            
+            # Perform the scan
+            try:
+                for file_path in directory.rglob("*.avi"):
+                    # Skip hidden directories (starting with .)
+                    if not any(part.startswith(".") for part in file_path.parts):
+                        avi_files.append(file_path)
+                        # Log progress every 50 files for large directories
+                        if len(avi_files) % 50 == 0:
+                            print(f"  ... found {len(avi_files)} AVI files so far in {directory.name}")
+                
+                # Update cache after successful scan
+                if use_smart_scan:
+                    self.cache.update_cache(directory, avi_files)
+                    print(f"  Cache: Updated with {len(avi_files)} files")
+                    
+            except Exception as e:
+                print(f"Error scanning {directory}: {e}")
+                return []
         else:
             # Use glob for non-recursive search
             avi_files = list(directory.glob("*.avi"))

@@ -72,7 +72,7 @@ def convert(
         bool,
         typer.Option(
             "--lab",
-            help="Use predefined lab directories (W:/4. PREPARAR RESUMEN, W:/8. Base Datos Unica)",
+            help="Use predefined lab directories (network paths)",
         ),
     ] = False,
     remove_source: Annotated[
@@ -97,14 +97,17 @@ def convert(
 
         # Override settings with CLI arguments if provided
         if lab:
-            # Use predefined lab directories
+            # Use predefined lab directories (UNC network paths)
             settings.conversion_directories = [
-                "W:/4. PREPARAR RESUMEN",
-                "W:/8. Base Datos Unica"
+                r"\\TNAS-Click\Team-design\4. PREPARAR RESUMEN",
+                r"\\TNAS-Click\Team-design\8. Base Datos Unica"
             ]
             console.print("[cyan]Using lab directories:[/cyan]")
-            console.print("  - W:/4. PREPARAR RESUMEN")
-            console.print("  - W:/8. Base Datos Unica")
+            console.print(r"  - \\TNAS-Click\Team-design\4. PREPARAR RESUMEN")
+            console.print(r"  - \\TNAS-Click\Team-design\8. Base Datos Unica")
+            console.print(f"[yellow]Total directories configured: {len(settings.conversion_directories)}[/yellow]")
+            import sys
+            sys.stdout.flush()  # Force output when running from VBS
         elif directories:
             settings.conversion_directories = directories
         
@@ -115,6 +118,10 @@ def convert(
 
         # Validate directories - use current directory if none specified
         dirs = settings.get_conversion_directories()
+        console.print(f"[yellow]Directories to process: {len(dirs)}[/yellow]")
+        for idx, d in enumerate(dirs, 1):
+            console.print(f"[yellow]  {idx}. {d}[/yellow]")
+        
         if not dirs:
             # Use current directory as default
             dirs = [Path(".")]

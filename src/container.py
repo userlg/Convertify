@@ -1,7 +1,6 @@
 """Dependency injection container."""
 
 from src.application.use_cases.convert_videos import ConvertVideosUseCase
-from src.config import Settings
 from src.domain.entities import ConversionConfig
 from src.infrastructure.file_repository import FileSystemRepository
 from src.infrastructure.logger import LoguruLogger
@@ -11,14 +10,10 @@ from src.infrastructure.video_converter import MoviePyVideoConverter
 class Container:
     """Dependency injection container."""
 
-    def __init__(self, settings: Settings):
+    def __init__(self):
         """
-        Initialize the container with settings.
-
-        Args:
-            settings: Application settings
+        Initialize the container.
         """
-        self.settings = settings
         self._logger = None
         self._file_repository = None
         self._video_converter = None
@@ -28,12 +23,13 @@ class Container:
     def logger(self):
         """Get logger instance (singleton)."""
         if self._logger is None:
-            log_file = self.settings.get_log_file_path()
+            from pathlib import Path
+
             self._logger = LoguruLogger(
-                log_file=log_file,
-                log_level=self.settings.log_level,
-                rotation=self.settings.log_rotation,
-                retention=self.settings.log_retention,
+                log_file=Path("logs/convertify.log"),
+                log_level="INFO",
+                rotation="10 MB",
+                retention="1 week",
             )
         return self._logger
 
@@ -64,16 +60,5 @@ class Container:
         return self._convert_videos_use_case
 
     def get_conversion_config(self) -> ConversionConfig:
-        """Get conversion configuration from settings."""
-        return ConversionConfig(
-            codec=self.settings.video_codec,
-            audio_codec=self.settings.audio_codec,
-            preset=self.settings.preset,
-            crf=self.settings.crf,
-            audio_bitrate=self.settings.audio_bitrate,
-            threads=self.settings.threads,
-            remove_source=self.settings.remove_source,
-            skip_if_exists=self.settings.skip_if_exists,
-            max_retries=self.settings.max_retries,
-            retry_delay_seconds=self.settings.retry_delay_seconds,
-        )
+        """Get conversion configuration with defaults."""
+        return ConversionConfig()

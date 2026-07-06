@@ -1,0 +1,2 @@
+[console_scripts]
+convertify = main:app

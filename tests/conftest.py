@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.config import Settings
 from src.domain.entities import ConversionConfig, VideoFile, VideoFormat
 from src.infrastructure.file_repository import FileSystemRepository
 from src.infrastructure.video_converter import MoviePyVideoConverter
@@ -81,15 +80,3 @@ def mock_video_converter():
     converter = MagicMock(spec=MoviePyVideoConverter)
     converter.is_valid_video = MagicMock(return_value=True)
     return converter
-
-
-@pytest.fixture
-def test_settings():
-    """Create test settings."""
-    return Settings(
-        conversion_directories="test_dir",
-        log_level="DEBUG",
-        log_file=None,  # No file logging in tests
-        max_workers=2,
-        remove_source=False,
-    )

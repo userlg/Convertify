@@ -1,6 +1,5 @@
 """Convert videos use case with async processing."""
 
-import asyncio
 from collections.abc import Callable
 from pathlib import Path
 
@@ -89,26 +88,3 @@ class ConvertVideosUseCase:
         self.logger.info(f"Batch conversion complete: {successful} successful, {failed} failed")
 
         return results
-
-    async def execute_async(
-        self,
-        directories: list[Path],
-        config: ConversionConfig,
-        progress_callback: Callable[[int, int], None] | None = None,
-    ) -> list[ConversionResult]:
-        """
-        Execute batch video conversion asynchronously.
-
-        Args:
-            directories: List of directories to search for videos
-            config: Conversion configuration
-            progress_callback: Optional callback for progress updates
-
-        Returns:
-            List of conversion results
-        """
-        # Run the synchronous execute in a thread pool
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, self.execute, directories, config, progress_callback
-        )

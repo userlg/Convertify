@@ -3,30 +3,19 @@
 import sys
 from pathlib import Path
 
-from src.config import load_settings
 from src.container import Container
 
 
 def main():
     """Convert AVI videos to MP4 format."""
     try:
-        # Load settings
-        settings = load_settings()
-
-        # Hardcode network paths
-        settings.conversion_directories = [
-            r"\\192.168.1.200\Team-design\4. PREPARAR RESUMEN",
-            r"\\192.168.1.200\Team-design\8. Base Datos Unica",
+        dirs = [
+            Path(r"\\192.168.1.200\Team-design\4. PREPARAR RESUMEN"),
+            Path(r"\\192.168.1.200\Team-design\8. Base Datos Unica"),
         ]
 
-        # Validate directories
-        dirs = settings.get_conversion_directories()
-        if not dirs:
-            # Use current directory as default
-            dirs = [Path(".")]
-
         # Initialize container
-        container = Container(settings)
+        container = Container()
         config = container.get_conversion_config()
         logger = container.logger
 

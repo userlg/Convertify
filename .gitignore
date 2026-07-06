@@ -1,16 +1,43 @@
-videos_avi/
-__pycache__
+# Python
+__pycache__/
 **/__pycache__/
-coverage_re/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+
+# Virtual environment
 .venv/
-avi/
+
+# IDE
 .vscode/
-.coverage
+.idea/
+
+# Testing / Coverage
 .pytest_cache/
-temp/
-dist/
+.coverage
+htmlcov/
+coverage_re/
+
+# Linting
+.ruff_cache/
+.mypy_cache/
+
+# Build / Distribution
 build/
-main.spec
-vids/** 
-main.exe
-convertify.spec
+dist/
+*.spec
+*.exe
+
+# Logs and cache (runtime artifacts)
+logs/
+cache/
+
+# Media / test videos
+videos_avi/
+avi/
+vids/**
+temp/
+
+# Environment
+.env

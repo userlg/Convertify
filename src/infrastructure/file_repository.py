@@ -115,22 +115,16 @@ class FileSystemRepository(IFileRepository):
             if use_smart_scan:
                 # Get cache stats
                 stats = self.cache.get_cache_stats(directory)
-                if stats["cached"]:
-                    print(
-                        f"  Cache: {stats['subdirs_cached']} subdirs cached, last scan: {stats['last_scan']}"
-                    )
+                _ = stats
 
                 # Get directories that need scanning
                 dirs_to_scan = self.cache.get_directories_to_scan(directory)
 
                 if not dirs_to_scan:
-                    print(f"  Cache: No new directories to scan in {directory.name}")
                     return []
 
-                if len(dirs_to_scan) == 1 and directory in dirs_to_scan:
-                    print(f"  Cache: Full scan required for {directory.name}")
-                else:
-                    print(f"  Cache: Scanning {len(dirs_to_scan)} new/modified directories")
+                # Keep branching behavior for cache; no stdout.
+                _ = len(dirs_to_scan)
 
             # Perform the scan
             try:
@@ -138,20 +132,14 @@ class FileSystemRepository(IFileRepository):
                     # Skip hidden directories (starting with .)
                     if not any(part.startswith(".") for part in file_path.parts):
                         avi_files.append(file_path)
-                        # Log progress every 50 files for large directories
-                        if len(avi_files) % 50 == 0:
-                            print(
-                                f"  ... found {len(avi_files)} AVI files so far in {directory.name}"
-                            )
 
                 # Update cache after successful scan
                 if use_smart_scan:
                     self.cache.update_cache(directory, avi_files)
-                    print(f"  Cache: Updated with {len(avi_files)} files")
 
-            except Exception as e:
-                print(f"Error scanning {directory}: {e}")
+            except Exception:
                 return []
+
         else:
             # Use glob for non-recursive search
             avi_files = list(directory.glob("*.avi"))

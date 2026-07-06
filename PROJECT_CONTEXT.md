@@ -16,3 +16,9 @@ Convertify es un script diseñado para correr en segundo plano en sistemas Windo
 - Se implementaron rutas de UNC `\\192.168.1.200\Team-design\...`.
 - Se corrigió el uso de pydantic-settings para que ignore buscar `.env`.
 - Limpieza general de scripts y directorios en desuso (`src/helpers`, `Captures`, `test_lab_dirs.py`, `.env`).
+
+## Historial Reciente (Correcciones 2026-07-06)
+- Se corrigió `Container.convert_videos_use_case` que referenciaba `self.settings.max_workers` (atributo eliminado con pydantic-settings). Ahora usa valor fijo `4`.
+- Se corrigieron tests del logger que referenciaban `logger.logger` en lugar de `logger._logger`.
+- Se añadió limpieza de handlers de loguru en test para evitar `PermissionError` en Windows al borrar temp dirs con archivos abiertos.
+- 36/36 tests passing.

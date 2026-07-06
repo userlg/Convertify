@@ -79,38 +79,45 @@ Convertify follows Clean Architecture principles:
 
 ```
 src/
-├── domain/          # Business logic, entities, and interfaces
-├── application/     # Use cases and services
-├── infrastructure/  # External implementations (FFmpeg, File System, Logger)
-├── config.py        # Configuration management
-└── container.py     # Dependency injection
+├── domain/          # Entities, value objects, exceptions, interfaces (contratos)
+├── application/     # Use cases + services (orquestación de conversión)
+├── infrastructure/  # Implementaciones concretas (FFmpeg, File System, Logger, caching, etc.)
 ```
 
+La composición (dependency injection) se realiza en `src/container.py`, y el flujo principal se ejecuta desde `main.py`.
+
 ### Key Design Decisions (V2 Background Service)
-1. **Instant Stream Copy**: Uses `codec="copy"` to wrap AVI into MP4 instantly without CPU-intensive encoding.
-2. **No .env required**: Standalone executable design prevents pathing issues with `.env` files in background services.
-3. **No CLI UI**: Removed `typer` and `rich` to prevent terminal output issues and keep the executable as lean as possible.
+1. **Instant Stream Copy**: El default usa `codec="copy"` para envolver AVI en MP4 sin recodificar (stream copy).
+2. **Rutas de red hardcodeadas por UNC IP**: El proceso trabaja con `\\192.168.1.200\...` para evitar problemas de servicios en background.
+3. **Logging silencioso/robusto**: Se usa `LoguruLogger` (`src/infrastructure/logger.py`) y se escriben logs en `logs/convertify.log`.
+4. **Cero CLI**: No hay interacción por consola; el ejecutable corre sin argumentos (compatibilidad con un `.vbs` silencioso).
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing y cobertura
 
 ```bash
 # Run all tests
 python -m pytest
+
+# Coverage (en src/)
+python -m pytest --cov=src --cov-report=term-missing
 ```
+
+Actualmente el proyecto mantiene **36/36 tests** pasando y una cobertura total ~**89%**.
 
 ---
 
 ## 📦 Building Executable
 
-To generate the standalone executable for Windows, run the following command exactly as shown:
+Para generar el ejecutable standalone en Windows:
 
 ```bash
 pyinstaller --onefile --icon=favicon.ico --collect-all moviepy --name convertify main.py --clean
 ```
 
-Output will be located at: `dist/convertify.exe`
+Salida:
+- `dist/convertify.exe`
 
 ---
 

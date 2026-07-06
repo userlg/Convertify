@@ -1,82 +1,40 @@
-# Convertify 2.0
+# Convertify 2.0 (Background Service Edition)
 
-![Static Badge](https://img.shields.io/badge/Python-3.12-F6D346)
+![Static Badge](https://img.shields.io/badge/Python-3.13-F6D346)
 ![Static Badge](https://img.shields.io/badge/Architecture-Clean-blue)
-![Static Badge](https://img.shields.io/badge/FFmpeg-Direct-green)
+![Static Badge](https://img.shields.io/badge/FFmpeg-Stream_Copy-green)
 ![Static Badge](https://img.shields.io/badge/Status-Production-success)
 
-**Ultra-fast AVI to MP4 video converter with Clean Architecture**
+**Instantaneous AVI to MP4 background converter for Windows**
 
-Convertify is a professional-grade video conversion tool that automatically converts AVI files to MP4 format with extreme speed optimization. Version 2.0 features a complete architectural redesign using Clean Architecture principles, direct FFmpeg integration for maximum performance, and a beautiful CLI interface.
+Convertify is a streamlined, zero-configuration background service designed to automatically monitor network directories and instantly wrap `.avi` files into `.mp4` containers.
 
 ---
 
 ## ✨ Features
 
-- 🎯 **Clean Architecture** - Maintainable, testable, and scalable codebase
-- ⚡ **Extreme Performance** - Direct FFmpeg integration (10-20x faster than frame-by-frame processing)
-- 🚀 **Speed Optimized** - Ultrafast preset with audio stream copying for minimal processing time
-- 🧠 **Intelligent Caching** - Scans only new/modified directories (perfect for 900+ subdirectories)
-- 🎨 **Beautiful CLI** - Rich terminal interface with real-time progress tracking
-- 📝 **Hidden Logging** - Comprehensive logging with automatic hidden folder creation
-- ⚙️ **Flexible Configuration** - Environment-based settings with multiple speed profiles
-- 🔄 **Retry Logic** - Automatic retry for failed conversions
-- 🔒 **File Lock Detection** - Skips files currently in use
-- 📊 **Detailed Reports** - Conversion statistics and file size comparisons
-- 🏢 **Lab Mode** - UNC network paths for lab environment workflows
-- 🖱️ **One-Click Execution** - Double-click exe to start conversion automatically
+- 🎯 **Clean Architecture** - Maintainable, testable, and scalable codebase.
+- ⚡ **Instant Conversion (Stream Copy)** - Bypasses slow re-encoding completely by copying the video and audio streams directly into an MP4 container.
+- 🏢 **Hardcoded Network Paths** - Direct IP-based UNC paths (`\\192.168.1.200`) prevent DNS resolution drops in background services.
+- 👻 **Zero-Argument Background Execution** - No CLI, no menus, no prompts. The executable is built to run silently in the background.
+- 🧠 **Intelligent Caching** - Scans only new/modified directories to handle massive network structures in seconds.
+- 📝 **Hidden Logging** - Comprehensive standard logging with automatic hidden folder creation.
+- 🔒 **File Lock Detection** - Safely skips files currently in use by other processes.
 
 ---
 
 ## 📋 Requirements
 
-- **Python 3.12+** (for development)
-- **Windows OS** (for file lock detection and hidden folders)
-- **FFmpeg** (automatically included with imageio-ffmpeg)
+- **Python 3.13+** (for development)
+- **Windows OS** (designed specifically for Windows environments and services)
 
 ---
 
-## 🚀 Quick Start (Executable)
+## 🚀 Execution
 
-### Download and Run
+The tool is designed to be executed as a compiled executable (`.exe`). Since it takes zero arguments, it can be launched directly or invoked via a silent `.vbs` wrapper.
 
-1. Download `convertify.exe` from releases
-2. **Option 1 - Double Click**: Place exe in folder with AVI files and double-click
-3. **Option 2 - Command Line**: Run with specific options
-
-```bash
-# Convert current directory (default)
-convertify.exe
-
-# Convert lab directories
-convertify.exe --lab
-
-# Convert specific directories
-convertify.exe --dir "C:\Videos" --dir "D:\Movies"
-
-# Show version
-convertify.exe version
-```
-
----
-
-## 🏢 Lab Mode
-
-For lab environments with predefined UNC network directories:
-
-```bash
-# Use predefined lab directories
-convertify.exe convert --lab
-```
-
-This automatically processes:
-
-- `\\TNAS-Click\Team-design\4. PREPARAR RESUMEN`
-- `\\TNAS-Click\Team-design\8. Base Datos Unica`
-
-### VBS Scripts for Lab
-
-**Production Script** (`convertify.vbs`):
+**VBS Production Script** (`convertify.vbs`):
 
 ```vbscript
 ' Silent execution for automated workflows
@@ -85,237 +43,32 @@ Set objFSO = CreateObject("Scripting.FileSystemObject")
 scriptDir = objFSO.GetParentFolderName(WScript.ScriptFullName)
 objShell.CurrentDirectory = scriptDir
 exePath = scriptDir & "\convertify.exe"
-command = """" & exePath & """ convert --lab"
-objShell.Run command, 0, True
+' No arguments needed
+objShell.Run """" & exePath & """", 0, True
 ```
 
-**Debug Script** (`convertify_debug.vbs`):
-
-```vbscript
-' Shows console window for troubleshooting
-objShell.Run command, 1, True  ' 1 = visible window
-```
-
-See [`VBS_SCRIPTS_GUIDE.md`](VBS_SCRIPTS_GUIDE.md) for detailed documentation.
-
----
-
-## 🧠 Intelligent Caching System
-
-**Perfect for directories with 900+ subdirectories!**
-
-Convertify includes an intelligent caching system that dramatically speeds up scans of large directory structures:
-
-### How It Works
-
-**First Scan** (e.g., 900 subdirectories):
-
-- Scans all directories: ~2-5 minutes
-- Caches directory modification times
-- Converts all found videos
-
-**Subsequent Scans** (every 5 minutes):
-
-- Only scans new/modified directories: ~5-15 seconds ⚡
-- Ignores unchanged directories
-- Processes only new videos
-
-### Cache Features
-
-- **Automatic** - No configuration needed
-- **Intelligent** - Detects new and modified directories
-- **Persistent** - Stored in `cache/directory_cache.json`
-- **Scalable** - Works with 1000+ subdirectories
-- **Safe** - Falls back to full scan on errors
-
-### Cache Location
-
-```
-C:\services\cache\directory_cache.json
-```
-
-### Performance Impact
-
-| Scenario                  | Time (900 subdirs) | Improvement       |
-| ------------------------- | ------------------ | ----------------- |
-| First scan                | 2-5 minutes        | Baseline          |
-| Subsequent (no changes)   | 5-10 seconds       | **20-40x faster** |
-| Subsequent (few new dirs) | 15-30 seconds      | **6-20x faster**  |
+This automatically processes the predefined directories:
+- `\\192.168.1.200\Team-design\4. PREPARAR RESUMEN`
+- `\\192.168.1.200\Team-design\8. Base Datos Unica`
 
 ---
 
 ## 💻 Development Setup
 
-### 1. Clone the repository
+### 1. Clone & Setup
 
 ```bash
 git clone https://github.com/userlg/Convertify.git
 cd Convertify
-```
-
-### 2. Create virtual environment
-
-```bash
 python -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+### 2. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure environment
-
-Copy `.env.example` to `.env` and customize:
-
-```env
-# Leave empty to use current directory
-CONVERSION_DIRECTORIES=
-
-# EXTREME SPEED PROFILE (default)
-VIDEO_CODEC=libx264
-AUDIO_CODEC=copy
-PRESET=ultrafast
-CRF=30
-```
-
-### 5. Run the application
-
-```bash
-# Convert current directory
-python main.py
-
-# Convert with lab mode
-python main.py --lab
-
-# Convert specific directories
-python main.py --dir "path/to/videos"
-```
-
----
-
-## ⚙️ Configuration
-
-### Speed Profiles
-
-Convertify offers three speed profiles:
-
-#### 1. EXTREME SPEED (Default) ⚡
-
-```env
-PRESET=ultrafast
-CRF=30
-AUDIO_CODEC=copy
-```
-
-- **Speed**: 5-10 seconds per 30-second video
-- **Quality**: Good for working files
-- **File Size**: ~20% larger
-
-#### 2. BALANCED ⚖️
-
-```env
-PRESET=veryfast
-CRF=26
-AUDIO_CODEC=aac
-AUDIO_BITRATE=128k
-```
-
-- **Speed**: 15-20 seconds per 30-second video
-- **Quality**: Excellent
-- **File Size**: Optimized
-
-#### 3. QUALITY 🎯
-
-```env
-PRESET=medium
-CRF=23
-AUDIO_CODEC=aac
-AUDIO_BITRATE=128k
-```
-
-- **Speed**: 25-30 seconds per 30-second video
-- **Quality**: Maximum
-- **File Size**: Best compression
-
-### Environment Variables
-
-```env
-# Conversion Directories (comma-separated)
-CONVERSION_DIRECTORIES=.
-
-# Video Settings
-VIDEO_CODEC=libx264
-AUDIO_CODEC=copy
-PRESET=ultrafast
-CRF=30
-AUDIO_BITRATE=96k
-THREADS=0
-
-# Behavior
-REMOVE_SOURCE=true
-SKIP_IF_EXISTS=true
-MAX_RETRIES=3
-RETRY_DELAY_SECONDS=1.0
-
-# Performance
-MAX_WORKERS=4
-
-# Logging (creates hidden folder)
-LOG_LEVEL=INFO
-LOG_FILE=logs/convertify.log
-LOG_ROTATION=10 MB
-LOG_RETENTION=1 week
-```
-
----
-
-## 🎯 Usage Examples
-
-### Basic Usage
-
-```bash
-# Convert current directory (double-click or run without args)
-convertify.exe
-
-# Convert and keep source files
-convertify.exe --keep-source
-
-# Convert and overwrite existing MP4s
-convertify.exe --overwrite
-```
-
-### Lab Environment
-
-```bash
-# Use lab directories
-convertify.exe --lab
-
-# Lab mode with custom options
-convertify.exe --lab --keep-source
-```
-
-### Custom Directories
-
-```bash
-# Single directory
-convertify.exe --dir "C:\Videos"
-
-# Multiple directories
-convertify.exe --dir "C:\Videos" --dir "D:\Movies" --dir "E:\Archive"
-```
-
-### Advanced Options
-
-```bash
-# Show help
-convertify.exe --help
-convertify.exe convert --help
-
-# Show version
-convertify.exe version
+# Install with development tools
+pip install -e .[dev]
 ```
 
 ---
@@ -326,127 +79,43 @@ Convertify follows Clean Architecture principles:
 
 ```
 src/
-├── domain/          # Business logic and entities
-│   ├── entities.py      # Core data models
-│   ├── interfaces.py    # Abstract interfaces
-│   └── exceptions.py    # Domain exceptions
+├── domain/          # Business logic, entities, and interfaces
 ├── application/     # Use cases and services
-│   ├── services/        # Business services
-│   └── use_cases/       # Application use cases
-├── infrastructure/  # External implementations
-│   ├── video_converter.py  # Direct FFmpeg integration
-│   ├── file_repository.py  # File system operations
-│   └── logger.py           # Logging with hidden folders
+├── infrastructure/  # External implementations (FFmpeg, File System, Logger)
 ├── config.py        # Configuration management
 └── container.py     # Dependency injection
 ```
 
-### Key Design Decisions
-
-1. **Direct FFmpeg Integration**: Replaced MoviePy frame-by-frame processing with direct FFmpeg subprocess calls for 10-20x speed improvement
-2. **Audio Stream Copying**: Eliminates audio re-encoding when possible, saving 40-50% conversion time
-3. **Hidden Logs**: Automatically creates hidden logs folder on Windows for cleaner directory structure
-4. **Default Convert**: Exe runs convert command by default when double-clicked
-5. **Lab Mode**: Predefined directories for streamlined lab workflows
+### Key Design Decisions (V2 Background Service)
+1. **Instant Stream Copy**: Uses `codec="copy"` to wrap AVI into MP4 instantly without CPU-intensive encoding.
+2. **No .env required**: Standalone executable design prevents pathing issues with `.env` files in background services.
+3. **No CLI UI**: Removed `typer` and `rich` to prevent terminal output issues and keep the executable as lean as possible.
 
 ---
 
 ## 🧪 Testing
 
-Run the test suite:
-
 ```bash
 # Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=src --cov-report=html
-
-# Run specific test file
-pytest tests/test_video_service.py -v
+python -m pytest
 ```
-
-All 39 tests passing ✅
 
 ---
 
 ## 📦 Building Executable
 
-Build standalone executable:
+To generate the standalone executable for Windows, run the following command exactly as shown:
 
 ```bash
 pyinstaller --onefile --icon=favicon.ico --collect-all moviepy --name convertify main.py --clean
 ```
 
-Output: `dist/convertify.exe`
-
----
-
-## 🚀 Performance Benchmarks
-
-### Conversion Speed (30-second 1080p video)
-
-| Configuration                   | Time per Video | Improvement       |
-| ------------------------------- | -------------- | ----------------- |
-| MoviePy (old)                   | ~300 seconds   | Baseline          |
-| FFmpeg + Medium                 | ~25 seconds    | 12x faster        |
-| FFmpeg + Ultrafast + Copy Audio | ~5-10 seconds  | **30-60x faster** |
-
-### Batch Performance (12 videos, ~30 seconds each)
-
-- **Old Version**: ~60 minutes
-- **Current Version**: **1-2 minutes** 🚀
-
----
-
-## 📝 Changelog
-
-### Version 2.0.0 (2026-01-09)
-
-**Major Changes:**
-
-- ✨ Complete architectural redesign using Clean Architecture
-- ⚡ Replaced MoviePy with direct FFmpeg integration (10-20x faster)
-- 🚀 Extreme speed optimization with audio stream copying
-- 📁 Hidden logs folder creation on Windows
-- 🖱️ One-click execution (double-click to convert)
-- 🏢 Lab mode for predefined directory workflows
-- 🎨 Beautiful CLI with Rich library
-- 📊 Comprehensive test suite (39 tests)
-- ⚙️ Flexible configuration with speed profiles
-- 🔄 Improved retry logic and error handling
-
-**Performance:**
-
-- 30-60x faster than version 1.0
-- 5-10 seconds per 30-second 1080p video
-- Batch processing: 12 videos in 1-2 minutes
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+Output will be located at: `dist/convertify.exe`
 
 ---
 
 ## 📄 License
-
 This project is licensed under the MIT License.
 
----
-
 ## 👤 Author
-
 **userlg**
-
----
-
-## 🙏 Acknowledgments
-
-- [MoviePy](https://github.com/Zulko/moviepy) - Original video processing library
-- [FFmpeg](https://ffmpeg.org/) - Core video conversion engine
-- [Typer](https://typer.tiangolo.com/) - CLI framework
-- [Rich](https://rich.readthedocs.io/) - Terminal formatting
-- [Loguru](https://github.com/Delgan/loguru) - Logging library
-- [Pydantic](https://pydantic-docs.helpmanual.io/) - Configuration management

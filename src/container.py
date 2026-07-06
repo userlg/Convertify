@@ -55,7 +55,7 @@ class Container:
                 converter=self.video_converter,
                 file_repository=self.file_repository,
                 logger=self.logger,
-                max_workers=self.settings.max_workers,
+                max_workers=4,
             )
         return self._convert_videos_use_case
 

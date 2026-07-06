@@ -46,6 +46,7 @@ class LoguruLogger(ILogger):
             # Make logs folder hidden on Windows
             if sys.platform == "win32":
                 import ctypes
+
                 try:
                     # Set hidden attribute on Windows
                     FILE_ATTRIBUTE_HIDDEN = 0x02

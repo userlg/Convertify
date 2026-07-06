@@ -12,7 +12,7 @@ def disable_env_file():
     env_backup = ".env.test_backup"
 
     # Save and clear CONVERSION_DIRECTORIES environment variable
-    old_conv_dirs = os.environ.pop('CONVERSION_DIRECTORIES', None)
+    old_conv_dirs = os.environ.pop("CONVERSION_DIRECTORIES", None)
 
     # Rename .env if it exists
     if os.path.exists(env_file):
@@ -29,4 +29,4 @@ def disable_env_file():
 
     # Restore environment variable
     if old_conv_dirs is not None:
-        os.environ['CONVERSION_DIRECTORIES'] = old_conv_dirs
+        os.environ["CONVERSION_DIRECTORIES"] = old_conv_dirs

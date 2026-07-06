@@ -9,7 +9,6 @@ directories with 900+ subdirectories that are constantly growing.
 import json
 import time
 from pathlib import Path
-from typing import Dict, Set
 
 
 class DirectoryCache:
@@ -24,18 +23,18 @@ class DirectoryCache:
         """
         if cache_file is None:
             cache_file = Path("cache/directory_cache.json")
-        
+
         self.cache_file = cache_file
         self.cache_file.parent.mkdir(parents=True, exist_ok=True)
-        self.cache: Dict[str, Dict] = self._load_cache()
+        self.cache: dict[str, dict] = self._load_cache()
 
-    def _load_cache(self) -> Dict[str, Dict]:
+    def _load_cache(self) -> dict[str, dict]:
         """Load cache from file."""
         if not self.cache_file.exists():
             return {}
-        
+
         try:
-            with open(self.cache_file, 'r', encoding='utf-8') as f:
+            with open(self.cache_file, encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             return {}
@@ -43,12 +42,12 @@ class DirectoryCache:
     def _save_cache(self) -> None:
         """Save cache to file."""
         try:
-            with open(self.cache_file, 'w', encoding='utf-8') as f:
+            with open(self.cache_file, "w", encoding="utf-8") as f:
                 json.dump(self.cache, f, indent=2)
         except Exception:
             pass  # Ignore cache save errors
 
-    def get_directories_to_scan(self, root_dir: Path) -> Set[Path]:
+    def get_directories_to_scan(self, root_dir: Path) -> set[Path]:
         """
         Get list of directories that need to be scanned.
 
@@ -64,8 +63,8 @@ class DirectoryCache:
             return set()
 
         root_str = str(root_dir)
-        dirs_to_scan: Set[Path] = set()
-        current_subdirs: Set[str] = set()
+        dirs_to_scan: set[Path] = set()
+        current_subdirs: set[str] = set()
 
         # Get all current subdirectories
         try:
@@ -79,10 +78,7 @@ class DirectoryCache:
         # Check cache for this root directory
         if root_str not in self.cache:
             # First time scanning this root - scan everything
-            self.cache[root_str] = {
-                "last_scan": time.time(),
-                "subdirs": {}
-            }
+            self.cache[root_str] = {"last_scan": time.time(), "subdirs": {}}
             return {root_dir}  # Full scan
 
         cached_subdirs = self.cache[root_str].get("subdirs", {})
@@ -99,7 +95,7 @@ class DirectoryCache:
                     subdir = Path(subdir_str)
                     current_mtime = subdir.stat().st_mtime
                     cached_mtime = cached_subdirs[subdir_str].get("mtime", 0)
-                    
+
                     if current_mtime > cached_mtime:
                         dirs_to_scan.add(subdir)
                 except Exception:
@@ -122,7 +118,7 @@ class DirectoryCache:
             scanned_files: List of files found during scan
         """
         root_str = str(root_dir)
-        
+
         if root_str not in self.cache:
             self.cache[root_str] = {"subdirs": {}}
 
@@ -130,24 +126,24 @@ class DirectoryCache:
         self.cache[root_str]["last_scan"] = time.time()
 
         # Update subdirectory mtimes
-        subdirs_seen: Set[str] = set()
-        
+        subdirs_seen: set[str] = set()
+
         for file_path in scanned_files:
             # Track all parent directories of found files
             current = file_path.parent
             while current != root_dir and current not in subdirs_seen:
                 subdir_str = str(current)
                 subdirs_seen.add(subdir_str)
-                
+
                 try:
                     mtime = current.stat().st_mtime
                     self.cache[root_str]["subdirs"][subdir_str] = {
                         "mtime": mtime,
-                        "last_checked": time.time()
+                        "last_checked": time.time(),
                     }
                 except Exception:
                     pass
-                
+
                 current = current.parent
 
         self._save_cache()
@@ -165,10 +161,10 @@ class DirectoryCache:
             root_str = str(root_dir)
             if root_str in self.cache:
                 del self.cache[root_str]
-        
+
         self._save_cache()
 
-    def get_cache_stats(self, root_dir: Path) -> Dict:
+    def get_cache_stats(self, root_dir: Path) -> dict:
         """
         Get statistics about the cache for a directory.
 
@@ -179,20 +175,18 @@ class DirectoryCache:
             Dictionary with cache statistics
         """
         root_str = str(root_dir)
-        
+
         if root_str not in self.cache:
-            return {
-                "cached": False,
-                "subdirs_cached": 0,
-                "last_scan": None
-            }
+            return {"cached": False, "subdirs_cached": 0, "last_scan": None}
 
         cache_data = self.cache[root_str]
         last_scan = cache_data.get("last_scan", 0)
-        
+
         return {
             "cached": True,
             "subdirs_cached": len(cache_data.get("subdirs", {})),
-            "last_scan": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_scan)) if last_scan else None,
-            "age_hours": (time.time() - last_scan) / 3600 if last_scan else None
+            "last_scan": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_scan))
+            if last_scan
+            else None,
+            "age_hours": (time.time() - last_scan) / 3600 if last_scan else None,
         }

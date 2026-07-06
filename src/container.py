@@ -1,6 +1,5 @@
 """Dependency injection container."""
 
-
 from src.application.use_cases.convert_videos import ConvertVideosUseCase
 from src.config import Settings
 from src.domain.entities import ConversionConfig

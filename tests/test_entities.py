@@ -74,8 +74,8 @@ def test_conversion_config_defaults():
     """Test ConversionConfig default values."""
     config = ConversionConfig()
 
-    assert config.codec == "libx264"
-    assert config.audio_codec == "aac"
+    assert config.codec == "copy"
+    assert config.audio_codec == "copy"
     assert config.preset == "medium"
     assert config.crf == 23
     assert config.remove_source is True

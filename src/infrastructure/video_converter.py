@@ -44,28 +44,46 @@ class MoviePyVideoConverter(IVideoConverter):
             # Build ffmpeg command for extreme speed
             cmd = [
                 ffmpeg_exe,
-                "-i", str(video_file.path),  # Input file
-                "-c:v", config.codec,  # Video codec
-                "-preset", config.preset,  # Encoding preset (ultrafast)
-                "-crf", str(config.crf),  # Quality
-                "-tune", "fastdecode",  # Optimize for fast decoding
+                "-i",
+                str(video_file.path),  # Input file
+                "-c:v",
+                config.codec,  # Video codec
             ]
+
+            if config.codec.lower() != "copy":
+                cmd.extend(
+                    [
+                        "-preset",
+                        config.preset,  # Encoding preset
+                        "-crf",
+                        str(config.crf),  # Quality
+                        "-tune",
+                        "fastdecode",  # Optimize for fast decoding
+                    ]
+                )
 
             # Handle audio codec - copy if specified, otherwise encode
             if config.audio_codec.lower() == "copy":
                 cmd.extend(["-c:a", "copy"])  # Copy audio stream without re-encoding
             else:
-                cmd.extend([
-                    "-c:a", config.audio_codec,  # Audio codec
-                    "-b:a", config.audio_bitrate,  # Audio bitrate
-                ])
+                cmd.extend(
+                    [
+                        "-c:a",
+                        config.audio_codec,  # Audio codec
+                        "-b:a",
+                        config.audio_bitrate,  # Audio bitrate
+                    ]
+                )
 
             # Add optimization flags
-            cmd.extend([
-                "-movflags", "+faststart",  # Optimize for streaming
-                "-y",  # Overwrite output
-                str(output_path)  # Output file
-            ])
+            cmd.extend(
+                [
+                    "-movflags",
+                    "+faststart",  # Optimize for streaming
+                    "-y",  # Overwrite output
+                    str(output_path),  # Output file
+                ]
+            )
 
             # Add threads if specified (insert after ffmpeg_exe)
             if config.threads > 0:
@@ -73,12 +91,7 @@ class MoviePyVideoConverter(IVideoConverter):
                 cmd.insert(2, str(config.threads))
 
             # Run ffmpeg conversion
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=False
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
             if result.returncode != 0:
                 error_msg = f"FFmpeg error: {result.stderr}"
@@ -133,19 +146,9 @@ class MoviePyVideoConverter(IVideoConverter):
         try:
             # Use ffmpeg to probe the file
             ffmpeg_exe = ffmpeg.get_ffmpeg_exe()
-            cmd = [
-                ffmpeg_exe,
-                "-v", "error",
-                "-i", str(file_path),
-                "-f", "null",
-                "-"
-            ]
+            cmd = [ffmpeg_exe, "-v", "error", "-i", str(file_path), "-f", "null", "-"]
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                timeout=5
-            )
+            result = subprocess.run(cmd, capture_output=True, timeout=5)
 
             # If ffmpeg can read it without error, it's valid
             return result.returncode == 0

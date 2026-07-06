@@ -12,7 +12,7 @@ def test_settings_defaults():
     """Test default settings values."""
     settings = Settings()
 
-    assert settings.video_codec == "libx264"
+    assert settings.video_codec == "copy"
     assert settings.audio_codec == "copy"  # Changed to 'copy' for extreme speed
     assert settings.preset == "ultrafast"  # Changed to 'ultrafast' for extreme speed
     assert settings.crf == 30  # Changed to 30 for extreme speed

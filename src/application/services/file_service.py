@@ -35,10 +35,10 @@ class FileDiscoveryService:
         all_files: list[Path] = []
 
         self.logger.info(f"Starting directory scan for {len(directories)} directories")
-        
+
         for idx, directory in enumerate(directories, 1):
             self.logger.info(f"Processing directory {idx}/{len(directories)}: {directory}")
-            
+
             if not directory.exists():
                 self.logger.warning(f"Directory does not exist: {directory}")
                 continue
@@ -48,17 +48,20 @@ class FileDiscoveryService:
                 continue
 
             self.logger.info(f"Searching for AVI files in: {directory}")
-            self.logger.info(f"This may take a while for directories with many subdirectories...")
-            
+            self.logger.info("This may take a while for directories with many subdirectories...")
+
             import time
+
             start_time = time.time()
-            
+
             files = self.file_repository.find_avi_files(directory, recursive)
-            
+
             scan_time = time.time() - start_time
             all_files.extend(files)
-            
-            self.logger.info(f"Found {len(files)} AVI files in {directory} (scan took {scan_time:.1f} seconds)")
+
+            self.logger.info(
+                f"Found {len(files)} AVI files in {directory} (scan took {scan_time:.1f} seconds)"
+            )
             self.logger.info(f"Total files so far: {len(all_files)}")
 
         self.logger.info(f"Directory scan complete. Total AVI files found: {len(all_files)}")

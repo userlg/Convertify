@@ -1,6 +1,5 @@
 """Tests for video conversion service."""
 
-
 from src.application.services.video_service import VideoConversionService
 from src.domain.entities import ConversionResult, ConversionStatus, VideoFormat
 

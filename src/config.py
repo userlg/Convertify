@@ -10,8 +10,6 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
     )
@@ -23,8 +21,12 @@ class Settings(BaseSettings):
     )
 
     # Conversion settings
-    video_codec: str = Field(default="libx264", description="Video codec for conversion")
-    audio_codec: str = Field(default="copy", description="Audio codec for conversion (copy for speed)")
+    video_codec: str = Field(
+        default="copy", description="Video codec for conversion (copy for speed)"
+    )
+    audio_codec: str = Field(
+        default="copy", description="Audio codec for conversion (copy for speed)"
+    )
     preset: str = Field(
         default="ultrafast",
         description="Encoding preset (ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow)",

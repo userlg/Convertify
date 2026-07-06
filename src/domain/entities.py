@@ -89,8 +89,8 @@ class ConversionResult:
 class ConversionConfig:
     """Configuration for video conversion."""
 
-    codec: str = "libx264"
-    audio_codec: str = "aac"
+    codec: str = "copy"
+    audio_codec: str = "copy"
     preset: str = "medium"
     crf: int = 23  # Constant Rate Factor (0-51, lower is better quality)
     audio_bitrate: str = "128k"

@@ -1,6 +1,5 @@
 """Main entry point for Convertify video converter."""
 
-import argparse
 import sys
 from pathlib import Path
 
@@ -10,39 +9,15 @@ from src.container import Container
 
 def main():
     """Convert AVI videos to MP4 format."""
-    parser = argparse.ArgumentParser(description="Convert AVI videos to MP4 format automatically")
-    parser.add_argument(
-        "command",
-        nargs="?",
-        default="convert",
-        help="Command (ignored, for backwards compatibility)",
-    )
-    parser.add_argument("--dir", "-d", action="append", help="Directories to scan for AVI files")
-    parser.add_argument("--lab", action="store_true", help="Use predefined lab directories")
-    parser.add_argument("--remove-source", action="store_true", default=None)
-    parser.add_argument("--keep-source", action="store_false", dest="remove_source")
-    parser.add_argument("--skip-existing", action="store_true", default=None)
-    parser.add_argument("--overwrite", action="store_false", dest="skip_existing")
-
-    args = parser.parse_args()
-
     try:
         # Load settings
         settings = load_settings()
 
-        # Override settings with CLI arguments if provided
-        if args.lab:
-            settings.conversion_directories = [
-                r"\\192.168.1.200\Team-design\4. PREPARAR RESUMEN",
-                r"\\192.168.1.200\Team-design\8. Base Datos Unica",
-            ]
-        elif args.dir:
-            settings.conversion_directories = args.dir
-
-        if args.remove_source is not None:
-            settings.remove_source = args.remove_source
-        if args.skip_existing is not None:
-            settings.skip_if_exists = args.skip_existing
+        # Hardcode network paths
+        settings.conversion_directories = [
+            r"\\192.168.1.200\Team-design\4. PREPARAR RESUMEN",
+            r"\\192.168.1.200\Team-design\8. Base Datos Unica",
+        ]
 
         # Validate directories
         dirs = settings.get_conversion_directories()

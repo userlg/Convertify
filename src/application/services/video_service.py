@@ -66,6 +66,12 @@ class VideoConversionService:
                 video_file.status = ConversionStatus.IN_PROGRESS
                 result = self.converter.convert(video_file, config)
 
+                # Seguridad: loguear el estado real devuelto por el conversor
+                self.logger.info(
+                    f"Converter returned: filename={video_file.filename}, success={result.success}, "
+                    f"status={video_file.status}, output_path={result.output_path}"
+                )
+
                 if result.success:
                     video_file.status = ConversionStatus.COMPLETED
                     self.logger.info(
@@ -84,21 +90,22 @@ class VideoConversionService:
                             )
 
                     return result
+
+                # Si no fue exitoso: NO marcar como success y continuar reintentos
+                last_error = result.error_message
+                if attempt < config.max_retries - 1:
+                    self.logger.warning(
+                        f"Conversion failed (attempt {attempt + 1}/{config.max_retries}): "
+                        f"{video_file.filename} - {result.error_message}"
+                    )
+                    time.sleep(config.retry_delay_seconds)
                 else:
-                    last_error = result.error_message
-                    if attempt < config.max_retries - 1:
-                        self.logger.warning(
-                            f"Conversion failed (attempt {attempt + 1}/{config.max_retries}): "
-                            f"{video_file.filename} - {result.error_message}"
-                        )
-                        time.sleep(config.retry_delay_seconds)
-                    else:
-                        video_file.status = ConversionStatus.FAILED
-                        self.logger.error(
-                            f"Conversion failed after {config.max_retries} attempts: "
-                            f"{video_file.filename}"
-                        )
-                        return result
+                    video_file.status = ConversionStatus.FAILED
+                    self.logger.error(
+                        f"Conversion failed after {config.max_retries} attempts: "
+                        f"{video_file.filename} - {result.error_message}"
+                    )
+                    return result
 
             except Exception as e:
                 last_error = str(e)

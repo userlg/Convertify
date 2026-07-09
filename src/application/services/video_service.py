@@ -54,7 +54,9 @@ class VideoConversionService:
             return ConversionResult(
                 video_file=video_file,
                 success=False,
+                output_path=None,
                 error_message="File is locked or in use",
+                duration_seconds=0.0,
             )
 
         # Retry logic

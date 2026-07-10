@@ -51,11 +51,12 @@ class Container:
     def convert_videos_use_case(self):
         """Get convert videos use case instance (singleton)."""
         if self._convert_videos_use_case is None:
+            # Modo A (producción): sin paralelismo para evitar issues con UNC/locks/transitorios.
             self._convert_videos_use_case = ConvertVideosUseCase(
                 converter=self.video_converter,
                 file_repository=self.file_repository,
                 logger=self.logger,
-                max_workers=4,
+                max_workers=1,
             )
         return self._convert_videos_use_case
 

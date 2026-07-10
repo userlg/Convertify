@@ -90,8 +90,26 @@ class MoviePyVideoConverter(IVideoConverter):
                 cmd.insert(1, "-threads")
                 cmd.insert(2, str(config.threads))
 
-            # Run ffmpeg conversion
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            # Run ffmpeg conversion (with optional timeout)
+            run_kwargs: dict = {
+                "capture_output": True,
+                "text": True,
+                "check": False,
+            }
+            if config.ffmpeg_timeout_seconds and config.ffmpeg_timeout_seconds > 0:
+                run_kwargs["timeout"] = config.ffmpeg_timeout_seconds
+
+            try:
+                result = subprocess.run(cmd, **run_kwargs)
+            except subprocess.TimeoutExpired:
+                return ConversionResult(
+                    video_file=video_file,
+                    success=False,
+                    error_message=(
+                        f"FFmpeg timeout after {config.ffmpeg_timeout_seconds}s"
+                    ),
+                    duration_seconds=time.time() - start_time,
+                )
 
             if result.returncode != 0:
                 error_msg = f"FFmpeg error: {result.stderr}"

@@ -128,10 +128,26 @@ class FileSystemRepository(IFileRepository):
 
             # Perform the scan
             try:
-                for file_path in directory.rglob("*.avi"):
-                    # Skip hidden directories (starting with .)
-                    if not any(part.startswith(".") for part in file_path.parts):
-                        avi_files.append(file_path)
+                if use_smart_scan:
+                    # If cache tells us which subdirs to scan, only scan those.
+                    # This avoids doing directory-wide rglob over very large trees.
+                    if not dirs_to_scan:
+                        return []
+
+                    # If cache indicates we need a full scan (e.g., first time / stale cache),
+                    # fall back to scanning the whole directory.
+                    if directory in dirs_to_scan or len(dirs_to_scan) == 1:
+                        scan_roots = [directory]
+                    else:
+                        scan_roots = list(dirs_to_scan)
+                else:
+                    scan_roots = [directory]
+
+                for scan_root in scan_roots:
+                    for file_path in scan_root.rglob("*.avi"):
+                        # Skip hidden directories (starting with .)
+                        if not any(part.startswith(".") for part in file_path.parts):
+                            avi_files.append(file_path)
 
                 # Update cache after successful scan
                 if use_smart_scan:

@@ -8,6 +8,7 @@ from src.container import Container
 
 def main():
     """Convert AVI videos to MP4 format."""
+    container: Container | None = None
     try:
         dirs = [
             Path(r"\\192.168.1.200\Team-design\4. PREPARAR RESUMEN"),
@@ -33,8 +34,8 @@ def main():
         results = use_case.execute(dirs, config)
 
         if results:
-            successful = sum(1 for r in results if r.success)
-            failed = sum(1 for r in results if not r.success)
+            successful = sum(1 for r in results if r.video_file.status.value == "completed")
+            failed = sum(1 for r in results if r.video_file.status.value == "failed")
             total_time = sum(r.duration_seconds for r in results)
 
             logger.info(
@@ -43,11 +44,21 @@ def main():
             )
             for r in results:
                 status = "Success" if r.success else "Failed"
-                logger.info(f"[{status}] {r.video_file.filename} in {r.duration_seconds:.1f}s")
+                logger.info(
+                    f"[{status}] {r.video_file.filename} in {r.duration_seconds:.1f}s"
+                )
         else:
             logger.info("No AVI files found to convert.")
 
-    except Exception:
+    except Exception as e:
+        # Ensure background/service failures are logged with traceback
+        try:
+            logger = container.logger if container else None
+            if logger:
+                logger.exception(f"Convertify crashed: {str(e)}")
+        except Exception:
+            # Fallback: no logger available
+            pass
         sys.exit(1)
 
 

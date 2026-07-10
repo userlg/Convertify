@@ -99,6 +99,7 @@ class ConversionConfig:
     skip_if_exists: bool = True
     max_retries: int = 3
     retry_delay_seconds: float = 1.0
+    ffmpeg_timeout_seconds: float = 0.0  # 0/<=0 means no timeout
 
     def __post_init__(self) -> None:
         """Validate configuration values."""
@@ -108,3 +109,5 @@ class ConversionConfig:
             raise ValueError("max_retries must be non-negative")
         if self.retry_delay_seconds < 0:
             raise ValueError("retry_delay_seconds must be non-negative")
+        if self.ffmpeg_timeout_seconds < 0:
+            raise ValueError("ffmpeg_timeout_seconds must be non-negative")

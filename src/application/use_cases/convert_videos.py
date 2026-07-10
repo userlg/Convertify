@@ -68,18 +68,43 @@ class ConvertVideosUseCase:
         results: list[ConversionResult] = []
         total = len(video_files)
 
-        # Use ProcessPoolExecutor for CPU-bound video conversion
-        # Note: In practice, moviepy is CPU-intensive, so process pool is better
-        # However, for simplicity and to avoid pickling issues, we'll use sequential
-        # processing here. For true parallel processing, you'd need to refactor
-        # the converter to be pickle-able or use a different approach.
+        # Parallel conversion (safe because each task runs an external ffmpeg subprocess
+        # and we don't share mutable state in the worker beyond read-only services).
+        #
+        # Note: We intentionally use ThreadPoolExecutor (not ProcessPoolExecutor) because
+        # movie/ffmpeg invocation is largely I/O + subprocess-bound and ProcessPool would
+        # require picklable callables/objects (often problematic on Windows).
+        from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        for idx, video_file in enumerate(video_files, start=1):
-            result = self.video_service.convert_video(video_file, config)
-            results.append(result)
+        max_workers = max(1, self.max_workers)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(self.video_service.convert_video, video_file, config): idx
+                for idx, video_file in enumerate(video_files, start=1)
+            }
 
-            if progress_callback:
-                progress_callback(idx, total)
+            # Preserve deterministic ordering in `results` by collecting with index
+            ordered: dict[int, ConversionResult] = {}
+
+            for future in as_completed(futures):
+                idx = futures[future]
+                try:
+                    ordered[idx] = future.result()
+                except Exception as e:
+                    # Should not happen often (VideoConversionService already catches),
+                    # but ensure one task failure doesn't stop the batch.
+                    video_file = video_files[idx - 1]
+                    ordered[idx] = ConversionResult(
+                        video_file=video_file,
+                        success=False,
+                        error_message=f"Unexpected conversion error: {e}",
+                        duration_seconds=0.0,
+                    )
+
+                if progress_callback:
+                    progress_callback(idx, total)
+
+            results = [ordered[i] for i in range(1, total + 1)]
 
         # Summary
         successful = sum(1 for r in results if r.success)
